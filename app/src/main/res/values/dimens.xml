@@ -1,0 +1,10 @@
+<resources>
+    <dimen name="fab_margin">16dp</dimen>
+    <dimen name="activity_horizontal_margin">16dp</dimen>
+    <dimen name="activity_vertical_margin">16dp</dimen>
+    <dimen name="margin_8dp">8dp</dimen>
+    <dimen name="textSize_16sp">16dp</dimen>
+    <dimen name="textSize_18sp">18dp</dimen>
+    <dimen name="textSize_22sp">22dp</dimen>
+    <dimen name="textSize_24sp">24dp</dimen>
+</resources>
