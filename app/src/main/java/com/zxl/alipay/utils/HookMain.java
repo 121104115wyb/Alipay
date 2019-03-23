@@ -69,14 +69,14 @@ public class HookMain implements IXposedHookLoadPackage {
 	    								MWebSocket.getInstance().init();
 										XposedBridge.log("-----------AA收款");
 	    								Login.hook(cl, context);
-	    								//消息列表
+	    								//消息列表(aa收款)
 	    								Messagemanipulation.hook(cl, context,true,true,true);
 	    								//红包+心跳
-	    								Redpacket.hook(cl, context);
+	    								//Redpacket.hook(cl, context);
 	    								//去红点
 	    								Reddot.hook(cl, context);
 	    								//个人收款
-	    								Personalreceipt.hook(cl, context);
+	    								//Personalreceipt.hook(cl, context);
 	    								PaymentAssistant.hook(cl, context);
 	    							}
 	    						
