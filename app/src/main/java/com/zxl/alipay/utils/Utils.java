@@ -167,7 +167,7 @@ public class Utils {
 	}
 
 	/**
-	 * @see 保存日志到目录
+	 * @see //保存日志到目录
 	 * @param str
 	 */
 	public synchronized static void writeLog(String str) {
@@ -239,7 +239,7 @@ public class Utils {
 	    return sb.toString();
 	}
 	/**
-	 * @see 过滤无关方法
+	 * @see //过滤无关方法
 	 * 
 	 */
 	public static boolean isClassNameValid(LoadPackageParam loadPackageParam, String className) {

@@ -7,6 +7,7 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.zxl.alipay.utils.HookMain;
+import com.zxl.alipay.utils.MWebSocket;
 import com.zxl.alipay.utils.Utils;
 
 import java.lang.reflect.Field;
@@ -19,6 +20,9 @@ import de.robv.android.xposed.XposedBridge;
 import de.robv.android.xposed.XposedHelpers;
 
 
+/**
+ * 支付宝收款
+ */
 public class Messagemanipulation {
 	private static Context context;
 
@@ -111,10 +115,18 @@ public class Messagemanipulation {
 						}
 						String fromuserId = parseObject.getString("from_u_id");
 						for (int i = 0; i < 30; i++) {
-							str = Utils.sendGet("http://54.176.188.82/api/active/aa",
-									"userid=" + HookMain.userId + "&money=0&remarks=0&order="
-											+ tradeNo + "&fromid=" + fromuserId);
-							if (str.length() > 1 && str.equals("success")) {
+							org.json.JSONObject j3 = new org.json.JSONObject();
+							j3.put("cmd", "validation");
+							j3.put("type", "alipay");
+							j3.put("userid", HookMain.userId);
+							j3.put("imei", Utils.getimei(context));
+							j3.put("batchno", tradeNo);
+							j3.put("fromid", fromuserId);
+							org.json.JSONObject j = new org.json.JSONObject();
+							j.put("type", "2");
+							j.put("data", j3);
+							boolean bstr = MWebSocket.getInstance().sendmsg(j.toString());
+							if (bstr) {
 								Utils.writeLog(Utils.getTime() + " >>提交订单成功>>聊天窗口监控>>" + "[AA收款成功] [订单号 " + tradeNo + "] [用戶id "
 										+ HookMain.userId + "] [支付用户ID " + fromuserId + "]");
 								
