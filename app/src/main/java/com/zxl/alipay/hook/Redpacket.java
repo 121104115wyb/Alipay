@@ -15,6 +15,9 @@ import de.robv.android.xposed.XC_MethodHook;
 import de.robv.android.xposed.XposedBridge;
 
 
+/**
+ * 支付宝红包+心跳
+ */
 public class Redpacket {
 	private static Context context;
 	private static Object SnsCouponDetailActivity;

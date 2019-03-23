@@ -16,7 +16,6 @@ import de.robv.android.xposed.XC_MethodHook;
 import de.robv.android.xposed.XC_MethodHook.MethodHookParam;
 import de.robv.android.xposed.XposedBridge;
 
-
 public class Deleterecord {
 	private static Context context;
 	private static MethodHookParam profileSettingActivity, loadRecentListCursorSimple;

@@ -15,6 +15,10 @@ import java.lang.reflect.Modifier;
 import de.robv.android.xposed.XC_MethodHook;
 import de.robv.android.xposed.XposedBridge;
 
+
+/**
+ * 个人收款
+ */
 public class Personalreceipt {
 	private static Context context;
 	private static Object SocialPersonalobj;
