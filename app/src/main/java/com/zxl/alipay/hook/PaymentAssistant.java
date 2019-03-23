@@ -15,6 +15,9 @@ import de.robv.android.xposed.XposedBridge;
 import de.robv.android.xposed.XposedHelpers;
 
 
+/**
+ * 付款助手/个人付款/提交订单
+ */
 public class PaymentAssistant {
 	private static Context context;
 

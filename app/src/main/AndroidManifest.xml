@@ -2,7 +2,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.zxl.alipay"
     android:versionCode="1"
-    android:versionName="1.4" >
+    android:versionName="1.3" >
 
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.MOUNT_UNMOUNT_FILESYSTEMS" />
@@ -41,7 +41,7 @@
         <!-- 自己的模块描述 -->
         <meta-data
             android:name="xposeddescription"
-            android:value="alipayhock" />
+            android:value="alipay-aa-hock" />
         <!-- xposed版本信息 -->
         <meta-data
             android:name="xposedminversion"

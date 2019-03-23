@@ -2,21 +2,16 @@ package com.zxl.alipay.activity;
 
 import android.app.Activity;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Message;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.RadioButton;
-import android.widget.RadioGroup;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import org.json.JSONException;
-import org.json.JSONObject;
+import com.zxl.alipay.R;
+import com.zxl.alipay.utils.Utils;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -28,230 +23,167 @@ import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.URL;
 import java.net.URLConnection;
-import com.zxl.alipay.R;
-import com.zxl.alipay.common.Common;
-import com.zxl.alipay.utils.Utils;
 
-import static com.zxl.alipay.common.Common.PostUserKeyUrl;
 
 public class Setting extends Activity {
-    private EditText set, key;
-    private TextView uri;
-    private Button b, b1;
-    private static String RadioBtnChecked = "RadioBtnChecked";
+	private EditText set,key;
+	private TextView uri;
+	private Button b,b1;
+	
+	/*private Handler h = new Handler() {
+		@Override
+		public void handleMessage(Message msg) {
+			// TODO Auto-generated method stub
+			switch (msg.what) {
+            case 1:
+                Toast.makeText(Setting.this, "绑定成功", Toast.LENGTH_SHORT).show();;
+                break;
+            case 2:
+            	Toast.makeText(Setting.this, "绑定失败", Toast.LENGTH_SHORT).show();
+                break;
+            	
+			}
+		}
+	};*/
 
-    private Handler h = new Handler() {
-        @Override
-        public void handleMessage(Message msg) {
-//            {"stat":false,"message":"imei重复或数据库异常","code":-102,"data":null}
-            String code = "", mesage = "", stat = "";
-            try {
-                Bundle bundle = msg.getData();
-                JSONObject data = new JSONObject(bundle.getString("result"));
-                code = data.getString("code");
-                mesage = data.getString("message");
-                stat = data.getString("stat");
-            } catch (JSONException e) {
-                e.printStackTrace();
-            }
+	@Override
+	protected void onCreate(Bundle savedInstanceState) {
+		super.onCreate(savedInstanceState);
+		setContentView(R.layout.seting);
+		b = (Button) findViewById(R.id.button1);
+		b1 = (Button) findViewById(R.id.subkey);
+		set = (EditText) findViewById(R.id.editText1);
+		key = (EditText) findViewById(R.id.key);
+		set.setText(readInternal());
+		key.setText(readkey());
+		uri = (TextView) findViewById(R.id.textView4);
+		uri.setOnClickListener(new OnClickListener() {
+			
+			@Override
+			public void onClick(View v) {
+				// TODO Auto-generated method stub
+				Intent i = new Intent();
+				i.setClass(Setting.this, MainActivity.class);
+				Setting.this.startActivity(i);
+			}
+		});
+	}
 
-            switch (msg.what) {
-                case 1:
-                    Toast.makeText(Setting.this, "绑定成功\n" + "code:" + code
-                            + "\n" + "message:" + mesage + "\n" + "stat:" + stat + "\n" + "绑定user_key地址:" + PostUserKeyUrl, Toast.LENGTH_SHORT).show();
+	public void c(View v) {
+		writeSet(set.getText().toString());
+	}
+	public void k(View v) {
+		final String str = key.getText().toString();
+		writekey(str);
+		new Thread(new Runnable() {
+			
+			@Override
+			public void run() {
+				// TODO Auto-generated method stub
+				String result = sendPost("http://xuanlv2.natapp1.cc/app/addevice","imei="+ Utils.getimei(Setting.this)+"&user_key="+str);
+				Toast.makeText(Setting.this, result, Toast.LENGTH_SHORT).show();;
+				/*if(result.indexOf("true")!=-1) {
+					*//*Message msg = new Message();
+					msg.what = 1;
+					h.sendMessage(msg);	*//*
+				}else {
+					*//*Message msg = new Message();
+					msg.what = 2;
+					h.sendMessage(msg);	*//*
+				}*/
+			}
+		}).start();
+	}
+	public synchronized static void writekey(String str) {
+		try {
+			File file1 = new File("/sdcard/FYHook/key.txt");
+			File file2 = file1.getParentFile();
+			if (!file1.exists()) {
+				file2.mkdir();
+				file1.createNewFile();
 
-                    break;
-                case 2:
-                    Toast.makeText(Setting.this, "绑定失败\n" + "code:" + code
-                            + "\n" + "message:" + mesage + "\n" + "stat:" + stat + "\n" + "绑定user_key地址:" + PostUserKeyUrl, Toast.LENGTH_LONG).show();
-                    break;
+			}
+			BufferedWriter bufferedWriter = new BufferedWriter(new FileWriter(file1));
 
-            }
-        }
-    };
+			bufferedWriter.append(str);
+			
+			bufferedWriter.flush();
+			bufferedWriter.close();
 
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.seting);
-        b = (Button) findViewById(R.id.button1);
-        b1 = (Button) findViewById(R.id.subkey);
-        set = (EditText) findViewById(R.id.editText1);
-        key = (EditText) findViewById(R.id.key);
-        RadioGroup radiogroup = (RadioGroup) findViewById(R.id.radiogroup);
-        radiogroup.setOnCheckedChangeListener(new MyRadioGroupCheckListener());
-        RadioButton productBtn = (RadioButton) findViewById(R.id.productbtn);
-        RadioButton testBtn = (RadioButton) findViewById(R.id.testbtn);
-        Boolean checked = getData(RadioBtnChecked);
-        changeUrl(checked);
-        if (checked) {
-            productBtn.setChecked(checked);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 
-        } else {
-            testBtn.setChecked(!checked);
-        }
+	}
+public static String readkey(){
+		
+	    StringBuilder sb = new StringBuilder("");
+	    try {
+			File file = new File("/sdcard/FYHook/key.txt");
+		    //打开文件输入流
+			BufferedReader bufferedReader = new BufferedReader(new FileReader(file));
+		    //读取文件内容
+			String str ;
+		    while((str = bufferedReader.readLine()) !=null){
+		        sb.append(str);
 
-        set.setText(readInternal());
-        key.setText(readkey());
-        uri = (TextView) findViewById(R.id.textView4);
-        uri.setOnClickListener(new OnClickListener() {
+		    }
+		    bufferedReader.close();
+		} catch (Exception e) {
+			// TODO: handle exception
+		}
+	    
+	    return sb.toString();
+	}
+	public synchronized static void writeSet(String str) {
+		try {
+			File file1 = new File("/sdcard/FYHook/setting.txt");
+			File file2 = file1.getParentFile();
+			if (!file1.exists()) {
+				file2.mkdir();
+				file1.createNewFile();
 
-            @Override
-            public void onClick(View v) {
-                // TODO Auto-generated method stub
-                Intent i = new Intent();
-                i.setClass(Setting.this, MainActivity.class);
-                Setting.this.startActivity(i);
-            }
-        });
-    }
+			}
+			BufferedWriter bufferedWriter = new BufferedWriter(new FileWriter(file1));
 
-    //radioButton监听
-    private class MyRadioGroupCheckListener implements RadioGroup.OnCheckedChangeListener {
-        @Override
-        public void onCheckedChanged(RadioGroup radioGroup, int i) {
-            switch (i) {
-                //正式地址
-                case R.id.productbtn:
-                    changeUrl(true);
-                    break;
-                //测试地址
-                case R.id.testbtn:
-                    changeUrl(false);
-                    break;
-                default:
-                    break;
+			bufferedWriter.append(str);
+			
+			bufferedWriter.flush();
+			bufferedWriter.close();
 
-            }
-        }
-    }
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 
+	}
 
-    public void c(View v) {
-        writeSet(set.getText().toString());
-    }
+	
+	
+	public static String readInternal(){
+		
+	    StringBuilder sb = new StringBuilder("");
+	    try {
+			File file = new File("/sdcard/FYHook/setting.txt");
+		    //打开文件输入流
+			BufferedReader bufferedReader = new BufferedReader(new FileReader(file));
+		    //读取文件内容
+			String str ;
+		    while((str = bufferedReader.readLine()) !=null){
+		        sb.append(str);
 
-    public void k(View v) {
-        final String str = key.getText().toString();
-        writekey(str);
-        new Thread(new Runnable() {
-
-            @Override
-            public void run() {
-
-                //http://xuanlv2.natapp1.cc/app/addevice
-                // TODO Auto-generated method stub
-                String result = sendPost(PostUserKeyUrl, "imei=" + Utils.getimei(Setting.this) + "&user_key=" + str);
-                if (result.indexOf("true") != -1) {
-                    Message msg = Message.obtain();
-                    Bundle bundle = new Bundle();
-                    bundle.putString("result", result);
-                    msg.setData(bundle);
-                    msg.what = 1;
-                    h.sendMessage(msg);
-                } else {
-                    Message msg = Message.obtain();
-                    Bundle bundle = new Bundle();
-                    bundle.putString("result", result);
-                    msg.setData(bundle);
-                    msg.what = 2;
-                    h.sendMessage(msg);
-                }
-            }
-        }).start();
-    }
-
-    public synchronized static void writekey(String str) {
-        try {
-            File file1 = new File("/sdcard/FYHook/key.txt");
-            File file2 = file1.getParentFile();
-            if (!file1.exists()) {
-                file2.mkdir();
-                file1.createNewFile();
-
-            }
-            BufferedWriter bufferedWriter = new BufferedWriter(new FileWriter(file1));
-
-            bufferedWriter.append(str);
-
-            bufferedWriter.flush();
-            bufferedWriter.close();
-
-        } catch (IOException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
-
-    }
-
-    public static String readkey() {
-
-        StringBuilder sb = new StringBuilder("");
-        try {
-            File file = new File("/sdcard/FYHook/key.txt");
-            //打开文件输入流
-            BufferedReader bufferedReader = new BufferedReader(new FileReader(file));
-            //读取文件内容
-            String str;
-            while ((str = bufferedReader.readLine()) != null) {
-                sb.append(str);
-
-            }
-            bufferedReader.close();
-        } catch (Exception e) {
-            // TODO: handle exception
-        }
-
-        return sb.toString();
-    }
-
-    public synchronized static void writeSet(String str) {
-        try {
-            File file1 = new File("/sdcard/FYHook/setting.txt");
-            File file2 = file1.getParentFile();
-            if (!file1.exists()) {
-                file2.mkdir();
-                file1.createNewFile();
-
-            }
-            BufferedWriter bufferedWriter = new BufferedWriter(new FileWriter(file1));
-
-            bufferedWriter.append(str);
-
-            bufferedWriter.flush();
-            bufferedWriter.close();
-
-        } catch (IOException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
-
-    }
-
-
-    public static String readInternal() {
-
-        StringBuilder sb = new StringBuilder("");
-        try {
-            File file = new File("/sdcard/FYHook/setting.txt");
-            //打开文件输入流
-            BufferedReader bufferedReader = new BufferedReader(new FileReader(file));
-            //读取文件内容
-            String str;
-            while ((str = bufferedReader.readLine()) != null) {
-                sb.append(str);
-
-            }
-            bufferedReader.close();
-        } catch (Exception e) {
-            // TODO: handle exception
-        }
-
-        return sb.toString();
-    }
-
-
-    public static String sendPost(String url, String param) {
+		    }
+		    bufferedReader.close();
+		} catch (Exception e) {
+			// TODO: handle exception
+		}
+	    
+	    return sb.toString();
+	}
+	
+	
+	public static String sendPost(String url, String param) {
         PrintWriter out = null;
         BufferedReader in = null;
         String result = "";
@@ -262,7 +194,7 @@ public class Setting extends Activity {
             // 设置通用的请求属性
             conn.setRequestProperty("accept", "*/*");
             conn.setRequestProperty("connection", "Keep-Alive");
-            conn.setRequestProperty("user-agent", "Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1;SV1)");
+            conn.setRequestProperty("user-agent","Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1;SV1)");
             // 发送POST请求必须设置如下两行
             conn.setDoOutput(true);
             conn.setDoInput(true);
@@ -284,96 +216,19 @@ public class Setting extends Activity {
             result = "false";
         }
         //使用finally块来关闭输出流、输入流
-        finally {
-            try {
-                if (out != null) {
+        finally{
+            try{
+                if(out!=null){
                     out.close();
                 }
-                if (in != null) {
+                if(in!=null){
                     in.close();
                 }
-            } catch (IOException ex) {
+            }
+            catch(IOException ex){
                 ex.printStackTrace();
             }
         }
         return result;
-    }
-
-
-    void changeUrl(Boolean chencked) {
-
-        if (chencked) {
-            //正式地址
-            PostUserKeyUrl = "http://182.61.178.193/app/addevice";
-            writeurl(Common.WebSocketUrl);
-        } else {
-            //测试地址
-            PostUserKeyUrl = "http://xuanlv2.natapp1.cc/app/addevice";
-            writeurl(Common.WebSocketTestUrl);
-        }
-        saveData(RadioBtnChecked, chencked);
-    }
-
-
-    //保存按钮的状态
-    private void saveData(String key, Boolean isChecked) {
-        SharedPreferences.Editor editor = getSharedPreferences("data", MODE_PRIVATE).edit();
-        editor.putBoolean(key, isChecked);
-        editor.commit();
-    }
-
-    //获取按钮的状态
-    private Boolean getData(String key) {
-        SharedPreferences preferences = getSharedPreferences("data", MODE_PRIVATE);
-        return preferences.getBoolean(key, true);
-
-    }
-
-
-    //xposend框架不能用SharedPreferences缓存机制，static静态变量机制
-    //保存websocket地址到文件中
-    public synchronized static void writeurl(String url) {
-        try {
-            File file1 = new File("/sdcard/FYHook/websocket.txt");
-            File file2 = file1.getParentFile();
-            if (!file1.exists()) {
-                file2.mkdir();
-                file1.createNewFile();
-
-            }
-            BufferedWriter bufferedWriter = new BufferedWriter(new FileWriter(file1));
-
-            bufferedWriter.append(url);
-
-            bufferedWriter.flush();
-            bufferedWriter.close();
-
-        } catch (IOException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
-
-    }
-    //读取文件中的websocket地址
-    public static String readUrl() {
-
-        StringBuilder sb = new StringBuilder("");
-        try {
-            File file = new File("/sdcard/FYHook/websocket.txt");
-            //打开文件输入流
-            BufferedReader bufferedReader = new BufferedReader(new FileReader(file));
-            //读取文件内容
-            String str;
-            while ((str = bufferedReader.readLine()) != null) {
-                sb.append(str);
-
-            }
-            bufferedReader.close();
-        } catch (Exception e) {
-            // TODO: handle exception
-        }
-
-        return sb.toString();
-    }
-
+	}
 }

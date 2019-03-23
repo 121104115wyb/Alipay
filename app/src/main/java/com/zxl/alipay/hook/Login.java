@@ -16,6 +16,10 @@ import de.robv.android.xposed.XC_MethodHook;
 import de.robv.android.xposed.XposedBridge;
 import de.robv.android.xposed.XposedHelpers;
 
+
+/**
+ * 支付宝登录hook
+ */
 public class Login {
 	private static Context context;
 	private static boolean t = false;

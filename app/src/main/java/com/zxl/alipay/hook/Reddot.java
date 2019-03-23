@@ -8,6 +8,9 @@ import java.lang.reflect.Modifier;
 import de.robv.android.xposed.XC_MethodHook;
 import de.robv.android.xposed.XposedBridge;
 
+/**
+ * 去红点
+ */
 public class Reddot {
 	private static Context context;
 	private static Object socialRecentListView;
