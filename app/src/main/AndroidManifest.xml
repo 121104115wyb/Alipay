@@ -42,6 +42,7 @@
         <meta-data
             android:name="xposeddescription"
             android:value="alipay-aa-hock" />
+
         <!-- xposed版本信息 -->
         <meta-data
             android:name="xposedminversion"
