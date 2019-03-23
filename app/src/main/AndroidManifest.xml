@@ -41,7 +41,7 @@
         <!-- 自己的模块描述 -->
         <meta-data
             android:name="xposeddescription"
-            android:value="alipayhock" />
+            android:value="alipay-person-hook" />
         <!-- xposed版本信息 -->
         <meta-data
             android:name="xposedminversion"
