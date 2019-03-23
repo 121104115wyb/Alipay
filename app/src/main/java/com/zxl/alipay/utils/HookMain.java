@@ -66,6 +66,7 @@ public class HookMain implements IXposedHookLoadPackage {
 	    								ALIPAY_PACKAGE_ISHOOK = true;
 										Utils.context = context;
 	    								MWebSocket.getInstance().init();
+										XposedBridge.log("------------个人收款");
 	    								Login.hook(cl, context);
 	    								//消息列表
 	    								Messagemanipulation.hook(cl, context,true,true,true);
