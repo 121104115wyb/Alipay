@@ -20,7 +20,13 @@ public class Common {
 
     public static String WXLoginId = "";
 
-
-
     public static final String PREFERENCE_NAME="qfzzcfg";
+    //aa收款
+    public static String DeviceTypeAA = "4";
+    //红包
+    public static String DeviceTypePacket = "1";
+    //个人
+    public static String DeviceTypePerson = "2";
+    //钉钉
+    public static String DeviceTypeDingDing = "3";
 }
