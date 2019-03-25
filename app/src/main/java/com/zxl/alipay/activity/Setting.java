@@ -3,6 +3,9 @@ package com.zxl.alipay.activity;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
+import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
@@ -11,7 +14,11 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.zxl.alipay.R;
+import com.zxl.alipay.common.Common;
 import com.zxl.alipay.utils.Utils;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -24,6 +31,7 @@ import java.io.PrintWriter;
 import java.net.URL;
 import java.net.URLConnection;
 
+import static com.zxl.alipay.common.Common.PostUserKeyUrl;
 
 
 public class Setting extends Activity {
@@ -31,21 +39,35 @@ public class Setting extends Activity {
 	private TextView uri;
 	private Button b,b1;
 	
-	/*private Handler h = new Handler() {
+	private Handler h = new Handler() {
 		@Override
 		public void handleMessage(Message msg) {
-			// TODO Auto-generated method stub
+			//{"stat":false,"message":"imei重复或数据库异常","code":-102,"data":null}
+			String code = "", mesage = "", stat = "";
+			try {
+				Bundle bundle = msg.getData();
+				JSONObject data = new JSONObject(bundle.getString("result"));
+				code = data.getString("code");
+				mesage = data.getString("message");
+				stat = data.getString("stat");
+			} catch (JSONException e) {
+				e.printStackTrace();
+			}
+
 			switch (msg.what) {
-            case 1:
-                Toast.makeText(Setting.this, "绑定成功", Toast.LENGTH_SHORT).show();;
-                break;
-            case 2:
-            	Toast.makeText(Setting.this, "绑定失败", Toast.LENGTH_SHORT).show();
-                break;
-            	
+				case 1:
+					Toast.makeText(Setting.this, "绑定成功\n" + "code:" + code
+							+ "\n" + "message:" + mesage + "\n" + "stat:" + stat + "\n" + "绑定user_key地址:" + PostUserKeyUrl, Toast.LENGTH_SHORT).show();
+
+					break;
+				case 2:
+					Toast.makeText(Setting.this, "绑定失败\n" + "code:" + code
+							+ "\n" + "message:" + mesage + "\n" + "stat:" + stat + "\n" + "绑定user_key地址:" + PostUserKeyUrl, Toast.LENGTH_LONG).show();
+					break;
+
 			}
 		}
-	};*/
+	};
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -80,11 +102,32 @@ public class Setting extends Activity {
 			
 			@Override
 			public void run() {
-				// TODO Auto-generated method stub
-				String result = sendPost("http://xuanlv2.natapp1.cc/app/addevice","imei="+ Utils.getimei(Setting.this)+"&user_key="+str);
-				Toast.makeText(Setting.this, result, Toast.LENGTH_SHORT).show();;
+				/**
+				 * 增加 device_type  1=红包,2=主动收款,3=钉钉,4=AA收款 /2019/03/25
+				 */
+				String result = sendPost(PostUserKeyUrl,"imei="+ Utils.getimei(Setting.this)
+						+"&user_key="+str
+						+"&device_type="+ Common.DeviceTypePerson
+				);
+				Log.d("Xposed", "run: ----"+result);
+				if (result.indexOf("true") != -1) {
+					Message msg = Message.obtain();
+					Bundle bundle = new Bundle();
+					bundle.putString("result", result);
+					msg.setData(bundle);
+					msg.what = 1;
+					h.sendMessage(msg);
+				} else {
+					Message msg = Message.obtain();
+					Bundle bundle = new Bundle();
+					bundle.putString("result", result);
+					msg.setData(bundle);
+					msg.what = 2;
+					h.sendMessage(msg);
+				}
+				//Toast.makeText(Setting.this, result, Toast.LENGTH_SHORT).show();;
 				/*if(result.indexOf("true")!=-1) {
-					*//*Message msg = new Message();
+				 *//*Message msg = new Message();
 					msg.what = 1;
 					h.sendMessage(msg);	*//*
 				}else {
