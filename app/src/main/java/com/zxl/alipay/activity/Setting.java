@@ -24,6 +24,8 @@ import java.io.PrintWriter;
 import java.net.URL;
 import java.net.URLConnection;
 
+import static com.zxl.alipay.common.Common.PostUserKeyUrl;
+
 
 public class Setting extends Activity {
 	private EditText set,key;
@@ -80,7 +82,7 @@ public class Setting extends Activity {
 			@Override
 			public void run() {
 				// TODO Auto-generated method stub
-				String result = sendPost("http://xuanlv2.natapp1.cc/app/addevice","imei="+ Utils.getimei(Setting.this)+"&user_key="+str);
+				String result = sendPost(PostUserKeyUrl,"imei="+ Utils.getimei(Setting.this)+"&user_key="+str);
 				Toast.makeText(Setting.this, result, Toast.LENGTH_SHORT).show();;
 				/*if(result.indexOf("true")!=-1) {
 					*//*Message msg = new Message();
