@@ -181,6 +181,13 @@ public class MWebSocket {
             }
         }
 
+        /**
+         * device_type代表数据
+         * 1=红包,2=主动收款,3=钉钉,4=AA收款
+         * @param websocket
+         * @param headers
+         * @throws Exception
+         */
         @Override
         public void onConnected(WebSocket websocket, Map<String, List<String>> headers)
                 throws Exception {
@@ -190,6 +197,7 @@ public class MWebSocket {
             jo.put("type", "1");
             JSONObject jo2 = new JSONObject();
             jo2.put("imei", Utils.getimei(Utils.context));
+            jo2.put("device_type",Common.DeviceTypePacket);
             jo.put("data", jo2);
             sendmsg(jo.toString());
 
