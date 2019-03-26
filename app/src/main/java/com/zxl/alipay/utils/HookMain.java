@@ -55,6 +55,7 @@ public class HookMain implements IXposedHookLoadPackage {
                             WECHAT_PACKAGE_ISHOOK = true;
                             Utils.context = context;
                             XposedBridge.log("handleLoadPackage: " + packageName);
+                            XposedBridge.log("-----微信Hook成功-- " + packageName+Utils.getVerName(context));
                             Utils.writeLog("微信Hook成功，当前微信版本:" + Utils.getVerName(context));
                             //Hook微信
                             WechatHook.getInstance().hook(appClassLoader, context);
