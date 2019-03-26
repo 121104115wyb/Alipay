@@ -22,11 +22,10 @@ import java.util.Date;
 import java.util.Timer;
 import java.util.TimerTask;
 
-
 public class MainActivity extends Activity {
 	private TextView log,uri;
 	
-	public static Timer timer = new Timer();
+	public static Timer timer = new Timer();;
 	Handler handler = new Handler() {
         @Override
         public void handleMessage(Message msg) {

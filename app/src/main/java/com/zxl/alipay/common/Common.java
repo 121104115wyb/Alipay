@@ -4,12 +4,13 @@ package com.zxl.alipay.common;
 public class Common {
     public static String TAG = "QFZZ";
 
+    //public static String WebSocketUrl = "ws://57552c82f0511154.natapp.cc:5588";
+
     public static String AlipayUserId = "";
 
     public static String WXLoginId = "";
 
     public static final String PREFERENCE_NAME="qfzzcfg";
-    // public static String WebSocketUrl = "ws://57552c82f0511154.natapp.cc:5588";
 
     //websocket正式地址
     public static String WebSocketUrl = "ws://182.61.178.193:9002";
@@ -29,4 +30,6 @@ public class Common {
     public static String DeviceTypePerson = "2";
     //钉钉
     public static String DeviceTypeDingDing = "3";
+    //微信
+    public static String DeviceTypeWEChat = "5";
 }

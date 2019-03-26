@@ -31,7 +31,7 @@ import java.io.PrintWriter;
 import java.net.URL;
 import java.net.URLConnection;
 
-import static com.zxl.alipay.common.Common.PostUserKeyUrl;
+import static com.zxl.alipay.common.Common.PostUserKeyTestUrl;
 
 
 public class Setting extends Activity {
@@ -42,6 +42,7 @@ public class Setting extends Activity {
     private Handler h = new Handler() {
         @Override
         public void handleMessage(Message msg) {
+            // TODO Auto-generated method stub
             //{"stat":false,"message":"imei重复或数据库异常","code":-102,"data":null}
             String code = "", mesage = "", stat = "";
             try {
@@ -57,15 +58,26 @@ public class Setting extends Activity {
             switch (msg.what) {
                 case 1:
                     Toast.makeText(Setting.this, "绑定成功\n" + "code:" + code
-                            + "\n" + "message:" + mesage + "\n" + "stat:" + stat + "\n" + "绑定user_key地址:" + PostUserKeyUrl, Toast.LENGTH_SHORT).show();
+                            + "\n" + "message:" + mesage + "\n" + "stat:" + stat + "\n"
+                            + "绑定user_key地址:" + PostUserKeyTestUrl, Toast.LENGTH_SHORT).show();
 
                     break;
                 case 2:
                     Toast.makeText(Setting.this, "绑定失败\n" + "code:" + code
-                            + "\n" + "message:" + mesage + "\n" + "stat:" + stat + "\n" + "绑定user_key地址:" + PostUserKeyUrl, Toast.LENGTH_LONG).show();
+                            + "\n" + "message:" + mesage + "\n" + "stat:" + stat + "\n"
+                            + "绑定user_key地址:" + PostUserKeyTestUrl, Toast.LENGTH_LONG).show();
                     break;
 
             }
+//			switch (msg.what) {
+//            case 1:
+//                Toast.makeText(Setting.this, "绑定成功", Toast.LENGTH_SHORT).show();;
+//                break;
+//            case 2:
+//            	Toast.makeText(Setting.this, "绑定失败", Toast.LENGTH_SHORT).show();
+//                break;
+//
+//			}
         }
     };
 
@@ -100,15 +112,16 @@ public class Setting extends Activity {
         final String str = key.getText().toString();
         writekey(str);
         new Thread(new Runnable() {
-            /**
-             *device_type 1=红包,2=主动收款,3=钉钉,4=AA收款
-             */
+
             @Override
             public void run() {
-                // TODO Auto-generated method stub
-                String result = sendPost("http://xuanlv2.natapp1.cc/app/addevice", "imei=" + Utils.getimei(Setting.this)
+                /**
+                 *device_type 1=红包,2=主动收款,3=钉钉,4=AA收款,5=微信收款
+                 */
+                String result = sendPost(PostUserKeyTestUrl, "imei=" + Utils.getimei(Setting.this)
                         + "&user_key=" + str
-                        + "&device_type=" + Common.DeviceTypePacket
+                        + "&device_type=" + Common.DeviceTypeWEChat
+
                 );
 
                 Log.d("Xposed", "run: ----" + result);
@@ -127,7 +140,9 @@ public class Setting extends Activity {
                     msg.what = 2;
                     h.sendMessage(msg);
                 }
-                //Toast.makeText(Setting.this, result, Toast.LENGTH_SHORT).show();;
+
+
+                //Toast.makeText(Setting.this, result, Toast.LENGTH_SHORT).show();
                 /*if(result.indexOf("true")!=-1) {
                  *//*Message msg = new Message();
 					msg.what = 1;

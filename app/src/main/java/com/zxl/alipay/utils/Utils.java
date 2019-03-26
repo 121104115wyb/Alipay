@@ -1,10 +1,12 @@
 package com.zxl.alipay.utils;
 
 import android.content.Context;
+import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
 import android.telephony.TelephonyManager;
 
 import com.alibaba.fastjson.JSONObject;
-import com.zxl.alipay.hook.Deleterecord;
+import com.zxl.alipay.common.Common;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -26,7 +28,6 @@ import java.util.TimerTask;
 import de.robv.android.xposed.XposedBridge;
 import de.robv.android.xposed.callbacks.XC_LoadPackage.LoadPackageParam;
 
-
 public class Utils {
 	public static Context context = null;
 	public static Map m = new HashMap();
@@ -35,12 +36,13 @@ public class Utils {
 	public static Map m4 = new HashMap();
 	public static ClassLoader cl = null;
 	public static Timer timer = new Timer();;
+	private static boolean isSubmitUserId = false;
 
 	public static TimerTask timerTask = new TimerTask() {
 		@Override
 		public void run() {
 			try {
-				cl.loadClass("com.alipay.mobile.quinox.LauncherActivity");
+				cl.loadClass("com.tencent.mm.ui.LauncherUI");
 				if (HookMain.userId.length() > 5) {
 					for (int i = 0; i < 10; i++) {
 						
@@ -53,7 +55,6 @@ public class Utils {
 						}
 						Thread.sleep(1000);
 					}
-					Deleterecord.deleteF();
 				} else {
 
 					Utils.writeLog(Utils.getTime() + " >>" + HookMain.userId + ">>心跳>>未登录");
@@ -91,25 +92,7 @@ public class Utils {
 		return MWebSocket.getInstance().sendmsg(j.toString());
 	}
 	
-	
-	public static boolean subaaOrder(String cmd, String type, String orderId, String money, String memo, String ordertype) {
-		JSONObject j = new JSONObject();
-		j.put("type", "2");
-		
-		JSONObject jso = new JSONObject();
-		jso.put("cmd", "aaqrcodeorder");
-		jso.put("type", type);
-		jso.put("imei", Utils.getimei(context));
-		jso.put("status", "success");
-		jso.put("orderId", orderId);
-		jso.put("money", money);
-		jso.put("memo", memo);
-		jso.put("time", System.currentTimeMillis());
-		jso.put("ordertype", ordertype);
-		
-		j.put("data", jso);
-		return MWebSocket.getInstance().sendmsg(j.toString());
-	}
+
 	public static synchronized boolean i(String cno) {
 
 		if (m.get(cno) == null) {
@@ -135,6 +118,48 @@ public class Utils {
 
 	}
 
+	public static String getVerName(Context context) {
+		String verName = "";
+		try {
+			verName = context.getPackageManager().getPackageInfo(context.getPackageName(), 0).versionName;
+		} catch (PackageManager.NameNotFoundException e) {
+			writeLog( "getVerName异常" + e.getMessage());
+		}
+		return verName;
+	}
+
+	/**
+	 * 提交微信生成的固码
+	 * @param qrcode 二维码
+	 * @param money 金额
+	 * @param mark 备注
+	 */
+	public static void SubmiWXSolidcode(final String qrcode, String money, String mark) {
+		try {
+			org.json.JSONObject jsonObject = new org.json.JSONObject();
+			jsonObject.put("cmd", "solidcode");
+			jsonObject.put("imei", getimei(context));
+			jsonObject.put("type", "wechat");
+			jsonObject.put("status", "success");
+			jsonObject.put("userid", Common.WXLoginId);
+			jsonObject.put("qrcode", qrcode);
+			jsonObject.put("money", money);
+			jsonObject.put("memo", mark);
+			JSONObject j = new JSONObject();
+			j.put("type", "2");
+			j.put("data", jsonObject);
+			if (MWebSocket.getInstance().sendmsg(jsonObject.toString())) {
+				writeLog("提交微信固码成功");
+			} else {
+				writeLog("提交微信固码成功");
+			}
+
+		} catch (Exception e) {
+			writeLog("SubmiWXSolidcode异常"+e.getMessage());
+		}
+	}
+
+
 	public static synchronized boolean i4(String cno) {
 		if (m4.get(cno) == null) {
 			if (m4.size() >= 1000) {
@@ -146,6 +171,9 @@ public class Utils {
 		return true;
 
 	}
+
+
+
 
 	public static synchronized boolean i3(String cno, String userid) {
 		if (m3.get(cno) == null) {
@@ -329,7 +357,56 @@ public class Utils {
 			return tm.getDeviceId();
 		}
 	}
-    
-    
-    
+
+	public static void SubmitWXUserId() {
+		try {
+			if (isSubmitUserId)
+			{return;}
+			try {
+				writeLog("开始提交微信信息");
+				org.json.JSONObject jsonObject = new org.json.JSONObject();
+				jsonObject.put("cmd","validation");
+				jsonObject.put("imei",getimei(context));
+				jsonObject.put("type","wechat");
+				jsonObject.put("userid",Common.WXLoginId);
+				jsonObject.put("loginid",Common.WXLoginId);
+				jsonObject.put("name",Common.WXLoginId);
+				org.json.JSONObject j = new org.json.JSONObject();
+				j.put("type", "2");
+				j.put("data", jsonObject);
+				if( MWebSocket.getInstance().sendmsg(j.toString()))
+				{
+					isSubmitUserId = true;
+					writeLog("提交微信信息成功");
+				}
+				else
+				{
+					writeLog("提交微信信息失败");
+				}
+			} catch (Exception e) {
+			}
+
+		} catch (Exception e) {
+			writeLog("SubmitWXUserId异常"+e.getMessage());
+		}
+	}
+
+
+	/**
+	 * 获取微信登录Id
+	 * @param context
+	 * @return
+	 */
+	public static String getWechatLoginId(Context context) {
+		String loginId="";
+		try {
+			SharedPreferences sharedPreferences=context.getSharedPreferences("com.tencent.mm_preferences", 0);
+			loginId = sharedPreferences.getString("login_user_name", "");
+		} catch (Exception e) {
+			XposedBridge.log(e.getMessage());
+		}
+		return loginId;
+	}
+
+
 }

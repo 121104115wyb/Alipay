@@ -1,6 +1,6 @@
 <resources>
     <string name="app_name_bak">Alipay</string>
 
-    <string name="app_name">支付红包</string>
+    <string name="app_name">微信收款</string>
     <string name="title_activity_base">BaseActivity</string>
 </resources>

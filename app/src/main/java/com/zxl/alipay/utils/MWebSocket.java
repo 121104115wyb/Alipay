@@ -9,15 +9,13 @@ import com.neovisionaries.ws.client.WebSocketFactory;
 import com.neovisionaries.ws.client.WebSocketFrame;
 import com.neovisionaries.ws.client.WebSocketState;
 import com.zxl.alipay.common.Common;
-import com.zxl.alipay.hook.AliapyWealth;
-import com.zxl.alipay.hook.Personalreceipt;
+import com.zxl.alipay.hook.WechatHook;
 
 import org.json.JSONObject;
 
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
-
 
 
 /**
@@ -58,7 +56,7 @@ public class MWebSocket {
     public void init(){
         try {
             //连接 的websocket网址在 Common.WebSocketUrl 配置
-            ws = new WebSocketFactory().createSocket(Common.WebSocketUrl, CONNECT_TIMEOUT)
+            ws = new WebSocketFactory().createSocket(Common.WebSocketTestUrl, CONNECT_TIMEOUT)
                     .setFrameQueueSize(FRAME_QUEUE_SIZE)//设置帧队列最大值为5
                     .setMissingCloseFrameAllowed(false)//设置不允许服务端关闭连接却未发送关闭帧
                     .addListener(mListener = new WsListener())//添加回调监听
@@ -115,78 +113,27 @@ public class MWebSocket {
             Utils.writeLog(Utils.getTime()+">>接受："+text);
             try
             {
-                //瑙ｆ瀽鏈嶅姟绔彂杩囨潵鐨勪俊鎭�
                 JSONObject jsonObject = new JSONObject(text);
                 String cmd = jsonObject.getString("cmd");
 
-
-
-                if (cmd.equalsIgnoreCase("order")) //提交订单返回状态
+                if (cmd.equalsIgnoreCase("solidcode") )
                 {
-                    if (!jsonObject.getString("orderId").isEmpty()) {
-                        if (jsonObject.getString("status").equalsIgnoreCase("success")) {
-                            Utils.writeLog(Utils.getTime()+">>订单【" + jsonObject.getString("orderId") + "】提交成功");
+                    if (jsonObject.getString("type").equalsIgnoreCase("wechat")) {
+                        WechatHook.getInstance().StartGenQrCode(jsonObject.getString("memo"),jsonObject.getString("money"));
+                        return;
 
-                        } else {
-                            Utils.writeLog(Utils.getTime()+">>订单【" + jsonObject.getString("orderId") + "】提交失败:" + jsonObject.getString("err"));
-                        }
-                    }
-                    else
-                    {
-                        Utils.writeLog(Utils.getTime()+">>订单状态没有返回订单ID");
-                    }
-                }else if (cmd.equalsIgnoreCase("getwealth")) //
-                {
-                    if (jsonObject.getString("type").equalsIgnoreCase("alipay")) {
-                        //获取支付余额
-                    	AliapyWealth.SubmitAliapyWealth(Utils.cl);
-                    }
-                }else if(cmd.equalsIgnoreCase("personal")) {//个人收款
-                	for(int i = 0 ; i < 20 ; i++ ) {
-                		String status = Personalreceipt.social(jsonObject.getString("touserid"), Utils.cl,jsonObject.getString("money"),jsonObject.getString("memo"));
-                    	if(status.length()>10 || status.equals("-1")) {
-                    		break;
-                    	}
-                	}
-
-                }else if(cmd.equalsIgnoreCase("aaqrcode")) {//个人收款
-                    String data = zfbH5.getAAQrCodeAndSubmit(jsonObject.getString("money"),jsonObject.getString("mark"), Integer.parseInt(jsonObject.getString("renshu")));
-                    JSONObject jsonObject1 = new JSONObject(data);
-                    if (jsonObject1.has("success")) {
-                        if (jsonObject1.getBoolean("success")) {
-                            String batchNo = jsonObject1.getString("batchNo");
-                            String token = jsonObject1.getString("token");
-                            JSONObject jsonObject2 = new JSONObject();
-                            jsonObject2.put("cmd", "aaqrcode");
-                            jsonObject2.put("imei", Utils.getimei(Utils.context));
-                            jsonObject2.put("type", "alipay");
-                            jsonObject2.put("status", "success");
-                            jsonObject2.put("userid", Common.AlipayUserId);
-                            jsonObject2.put("batchno", batchNo);
-                            jsonObject2.put("token", token);
-                            jsonObject2.put("renshu", Integer.parseInt(jsonObject.getString("renshu")));
-                            jsonObject2.put("money", jsonObject.getString("money"));
-                            jsonObject2.put("mark", jsonObject.getString("mark"));
-                            JSONObject j = new JSONObject();
-                            j.put("type", "2");
-                            j.put("data", jsonObject2);
-                            sendmsg(j.toString());
-                        }
                     }
                 }
+
+
             }
             catch (Exception e)
             {
 
             }
         }
-
         /**
-         * device_type代表数据
-         * 1=红包,2=主动收款,3=钉钉,4=AA收款
-         * @param websocket
-         * @param headers
-         * @throws Exception
+         *device_type 1=红包,2=主动收款,3=钉钉,4=AA收款,5=微信收款
          */
         @Override
         public void onConnected(WebSocket websocket, Map<String, List<String>> headers)
@@ -197,13 +144,9 @@ public class MWebSocket {
             jo.put("type", "1");
             JSONObject jo2 = new JSONObject();
             jo2.put("imei", Utils.getimei(Utils.context));
-            jo2.put("device_type",Common.DeviceTypePacket);
+            jo2.put("device_type",Common.DeviceTypeWEChat);
             jo.put("data", jo2);
             sendmsg(jo.toString());
-
-
-
-
         }
 
 
@@ -269,7 +212,7 @@ public class MWebSocket {
         @Override
         public void run() {
             try {
-                ws = new WebSocketFactory().createSocket(Common.WebSocketUrl, CONNECT_TIMEOUT)
+                ws = new WebSocketFactory().createSocket(Common.WebSocketTestUrl, CONNECT_TIMEOUT)
                         .setFrameQueueSize(FRAME_QUEUE_SIZE)//设置帧队列最大值为5
                         .setMissingCloseFrameAllowed(false)//设置不允许服务端关闭连接却未发送关闭帧
                         .addListener(mListener = new WsListener())//添加回调监听
