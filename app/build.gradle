@@ -7,15 +7,95 @@ android {
         minSdkVersion 15
         targetSdkVersion 28
         versionCode 1
-        versionName "1.0"
+        versionName "1.3"
+        flavorDimensions "versionCode"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
     }
-    buildTypes {
-        release {
-            minifyEnabled false
-            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+
+    signingConfigs {
+        create("release") {
+            storeFile file("../config/build/AlipayFor.jks")
+            storePassword "fyalipay"
+            keyAlias "alipayfor"
+            keyPassword "fyalipay"
+            storeType "jks"
         }
     }
+
+    buildTypes {
+        release {
+            //优化png图片
+            crunchPngs true
+            //开启资源压缩（先去除无用资源，然后进行资源压缩，条件是混淆必须首先开启，不开启则没用）
+            shrinkResources false
+            //开启混淆
+            minifyEnabled false
+            // 不显示Log
+            buildConfigField "boolean", "LOG_DEBUG", "false"
+            //Zipalign优化
+            zipAlignEnabled true
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+            signingConfig signingConfigs.release
+        }
+    }
+
+    //自定义apk名称含版本号信息
+    android.applicationVariants.all { variant ->
+
+        // 更新至Android Studio 3.3 gradle 4.10.1
+        variant.outputs.all {
+            outputFileName = "alipay-packet-${variant.versionName}-${releaseTime()}.apk"
+            //outputFileName = "alipay-packet_${variant.versionCode}-${variant.versionName}-${releaseTime()}.apk"
+        }
+
+        //更新前
+        /*
+        variant.outputs.all { output ->
+            def fileName = "Nanosic_OTA_${defaultConfig.versionCode}-${defaultConfig.versionName}-${releaseTime()}.apk"
+            //def fileName = outputFile.name.replace("app", "${rootProject.ext.appName}-${releaseTime()}-${defaultConfig.versionCode}-${defaultConfig.versionName}")
+            def outputFile = output.outputFile
+            if (outputFile != null && outputFile.name.endsWith('.apk')) {
+                //这里修改apk文件名
+                outputFileName = fileName
+            }
+        }
+        */
+    }
+
+//    android.applicationVariants.all { variant ->
+//        variant.outputs.all { output ->
+//            def outputFile = output.outputFile
+//            def fileName
+//            if (outputFile != null && outputFile.name.endsWith('.apk')) {
+//                if (variant.buildType.name.equals('release')) {//如果是release包
+//                    fileName = "anjian_release_v${variant.versionName}.apk"
+//                } else if (variant.buildType.name.equals('debug')) {//如果是debug包
+//                    fileName = "anjian_debug_v${variant.versionName}.apk"
+//                }
+//                outputFileName = fileName
+//            }
+//        }
+//    }
+//
+//
+//    productFlavors {
+//        kuan {}
+//        xiaomi {}
+//        qh360 {}
+//        baidu {}
+//        wandoujia {}
+//    }
+//
+//    productFlavors.all {
+//        flavor -> flavor.manifestPlaceholders = [UMENG_CHANNEL_VALUE: name]
+//    }
+
+}
+
+
+//获取编译时间
+static def releaseTime() {
+    return new Date().format("yyyy-MM-dd", TimeZone.getTimeZone("UTC"))
 }
 
 dependencies {
